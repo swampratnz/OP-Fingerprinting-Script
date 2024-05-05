@@ -350,7 +350,8 @@ const fingerprint = (): Promise<{
           resolve([0, [Number(screen.width), Number(screen.height)].sort().reverse().join("x")]);
         });
     },
-      jsHeapSizeLimit: (): Promise<[number, any]> => {
+     /* Removing due to window.performance varies depending on what is happening in browser.
+     jsHeapSizeLimit: (): Promise<[number, any]> => {
         return new Promise((resolve): void => {
           const perf = window.performance as any;
           if (perf == undefined) resolve([-1, null]);
@@ -360,7 +361,7 @@ const fingerprint = (): Promise<{
           if (jsHeapSizeLimit === undefined) resolve([-3, null]);
           resolve([0, jsHeapSizeLimit]);
         });
-      },
+      }, */
       audioContext: (): Promise<[number, any]> => {
         return new Promise((resolve): void => {
           if (isBrave()) resolve([-1, null]);
@@ -542,6 +543,7 @@ const fingerprint = (): Promise<{
           }]);
         });
       },
+      /* Removing due to window.performance varies depending on what is happening in browser.
       performance: (): Promise<[number, any]> => {
         return new Promise((resolve): void => {
           if (!isChrome()) resolve([-1, null]);
@@ -574,7 +576,7 @@ const fingerprint = (): Promise<{
 
           resolve([0, valueA]);
         });
-      },
+      }, */
       speechSynthesis: (): Promise<[number, any]> => {
         return new Promise((resolve): void => {
           if (isBrave() || isFirefox() || isSafari()) resolve([-1, null]);
@@ -874,16 +876,22 @@ const fingerprint = (): Promise<{
       },
       sharedArrayBuffer: (): Promise<[number, any]> => {
         return new Promise((resolve): void => {
-          if (typeof window.SharedArrayBuffer === "function") {
-            const sab = new window.SharedArrayBuffer(1);
-            if (sab.byteLength !== undefined) {
-              resolve([0, sab.byteLength]);
+            // Using 'window as any' to bypass type checking for SharedArrayBuffer
+            const anyWindow = window as any;
+    
+            if (typeof anyWindow.SharedArrayBuffer === "function") {
+                const sab = new anyWindow.SharedArrayBuffer(1);
+                if (sab.byteLength !== undefined) {
+                    resolve([0, sab.byteLength]);
+                    return; // Add return to prevent further execution after resolve
+                }
+                resolve([-2, null]);
+                return; // Add return here as well
             }
-            resolve([-2, null]);
-          }
-          resolve([-1, null]);
+            resolve([-1, null]);
         });
-      },
+    },
+    
       webdriver: (): Promise<[number, any]> => {
         return new Promise((resolve): void => {
           const webd = navigator.webdriver;

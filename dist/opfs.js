@@ -339,20 +339,18 @@ var fingerprint = function () {
                     resolve([0, [Number(screen.width), Number(screen.height)].sort().reverse().join("x")]);
                 });
             },
-            jsHeapSizeLimit: function () {
-                return new Promise(function (resolve) {
-                    var perf = window.performance;
-                    if (perf == undefined)
-                        resolve([-1, null]);
-                    var memory = perf.memory;
-                    if (memory === undefined)
-                        resolve([-2, null]);
-                    var jsHeapSizeLimit = memory.jsHeapSizeLimit;
-                    if (jsHeapSizeLimit === undefined)
-                        resolve([-3, null]);
-                    resolve([0, jsHeapSizeLimit]);
-                });
-            },
+            /* Removing due to window.performance varies depending on what is happening in browser.
+            jsHeapSizeLimit: (): Promise<[number, any]> => {
+               return new Promise((resolve): void => {
+                 const perf = window.performance as any;
+                 if (perf == undefined) resolve([-1, null]);
+                 const memory = perf.memory;
+                 if (memory === undefined) resolve([-2, null]);
+                 const jsHeapSizeLimit = memory.jsHeapSizeLimit;
+                 if (jsHeapSizeLimit === undefined) resolve([-3, null]);
+                 resolve([0, jsHeapSizeLimit]);
+               });
+             }, */
             audioContext: function () {
                 return new Promise(function (resolve) {
                     if (isBrave())
@@ -510,36 +508,40 @@ var fingerprint = function () {
                         }]);
                 });
             },
-            performance: function () {
-                return new Promise(function (resolve) {
-                    if (!isChrome())
-                        resolve([-1, null]);
-                    var perf = window.performance;
-                    if (perf === undefined)
-                        resolve([-2, null]);
-                    if (typeof perf.now !== "function")
-                        resolve([-3, null]);
-                    var valueA = 1;
-                    var valueB = 1;
-                    var now = perf.now();
-                    var newNow = now;
-                    for (var i = 0; i < 5000; i++) {
-                        if ((now = newNow) < (newNow = perf.now())) {
-                            var difference = newNow - now;
-                            if (difference > valueA) {
-                                if (difference < valueB) {
-                                    valueB = difference;
-                                }
-                            }
-                            else if (difference < valueA) {
-                                valueB = valueA;
-                                valueA = difference;
-                            }
-                        }
+            /* Removing due to window.performance varies depending on what is happening in browser.
+            performance: (): Promise<[number, any]> => {
+              return new Promise((resolve): void => {
+                if (!isChrome()) resolve([-1, null]);
+      
+                const perf = window.performance;
+      
+                if (perf === undefined) resolve([-2, null]);
+                if (typeof perf.now !== "function") resolve([-3, null]);
+      
+                let valueA = 1;
+                let valueB = 1;
+      
+                let now = perf.now();
+      
+                let newNow = now;
+      
+                for (let i = 0; i < 5000; i++) {
+                  if ((now = newNow) < (newNow = perf.now())) {
+                    const difference = newNow - now;
+                    if (difference > valueA) {
+                      if (difference < valueB) {
+                        valueB = difference;
+                      }
+                    } else if (difference < valueA) {
+                      valueB = valueA;
+                      valueA = difference;
                     }
-                    resolve([0, valueA]);
-                });
-            },
+                  }
+                }
+      
+                resolve([0, valueA]);
+              });
+            }, */
             speechSynthesis: function () {
                 return new Promise(function (resolve) {
                     if (isBrave() || isFirefox() || isSafari())
@@ -785,10 +787,10 @@ var fingerprint = function () {
                             if (plugin) {
                                 var mimes = [];
                                 for (var l = 0; l < plugin.length; l++) {
-                                    var mime_1 = plugin[l];
+                                    var mime = plugin[l];
                                     mimes.push({
-                                        type: mime_1.type,
-                                        suffixes: mime_1.suffixes
+                                        type: mime.type,
+                                        suffixes: mime.suffixes
                                     });
                                 }
                                 output.push({
@@ -812,12 +814,16 @@ var fingerprint = function () {
             },
             sharedArrayBuffer: function () {
                 return new Promise(function (resolve) {
-                    if (typeof window.SharedArrayBuffer === "function") {
-                        var sab = new window.SharedArrayBuffer(1);
+                    // Using 'window as any' to bypass type checking for SharedArrayBuffer
+                    var anyWindow = window;
+                    if (typeof anyWindow.SharedArrayBuffer === "function") {
+                        var sab = new anyWindow.SharedArrayBuffer(1);
                         if (sab.byteLength !== undefined) {
                             resolve([0, sab.byteLength]);
+                            return; // Add return to prevent further execution after resolve
                         }
                         resolve([-2, null]);
+                        return; // Add return here as well
                     }
                     resolve([-1, null]);
                 });
