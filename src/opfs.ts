@@ -349,7 +349,7 @@ const fingerprint = (): Promise<{
           if (isChrome() && !isBrave()) resolve([-2, null]);
           resolve([0, [Number(screen.width), Number(screen.height)].sort().reverse().join("x")]);
         });
-    },
+    }, /*
       jsHeapSizeLimit: (): Promise<[number, any]> => {
         return new Promise((resolve): void => {
           const perf = window.performance as any;
@@ -360,7 +360,7 @@ const fingerprint = (): Promise<{
           if (jsHeapSizeLimit === undefined) resolve([-3, null]);
           resolve([0, jsHeapSizeLimit]);
         });
-      },
+      },*/
       audioContext: (): Promise<[number, any]> => {
         return new Promise((resolve): void => {
           if (isBrave()) resolve([-1, null]);
@@ -542,6 +542,7 @@ const fingerprint = (): Promise<{
           }]);
         });
       },
+      /*
       performance: (): Promise<[number, any]> => {
         return new Promise((resolve): void => {
           if (!isChrome()) resolve([-1, null]);
@@ -574,7 +575,7 @@ const fingerprint = (): Promise<{
 
           resolve([0, valueA]);
         });
-      },
+      },*/
       speechSynthesis: (): Promise<[number, any]> => {
         return new Promise((resolve): void => {
           if (isBrave() || isFirefox() || isSafari()) resolve([-1, null]);
